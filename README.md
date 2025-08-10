@@ -10,3 +10,7 @@ Here i made a Tic Tac Toe game using Numpy and pygame library with the Minimax A
 <img width="958" height="551" alt="image" src="https://github.com/user-attachments/assets/b7491f9a-d3bd-40c1-b50c-ecaf64ad9e6a" />
 <img width="959" height="542" alt="image" src="https://github.com/user-attachments/assets/86041e66-2ac7-4786-bd31-26c1639edc12" />
 
+# Demo Video 
+
+https://github.com/user-attachments/assets/63a61bfc-a0ee-4931-9489-26b78cc053d1
+
