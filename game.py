@@ -4,14 +4,12 @@ import numpy as np
 
 pygame.init()
 
-#Colors
 WHITE = (255, 255, 255)
 GRAY = (180, 180, 180)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLACK = (0, 0, 0)
 
-#size
 WIDTH = 300
 HEIGHT = 300
 LINE_WIDTH = 5
@@ -37,7 +35,6 @@ def draw_figures(color=WHITE):
     for row in range(BOARD_ROWS):
         for col in range(BOARD_COLS):
             if board[row][col] == 1:
-                # Draw O
                 pygame.draw.circle(
                     screen,
                     color,
@@ -46,20 +43,19 @@ def draw_figures(color=WHITE):
                     CIRCLE_WIDTH
                 )
             elif board[row][col] == 2:
-                # Draw X (two crossing lines)
                 pygame.draw.line(
                     screen,
                     color,
                     start_pos=(col * SQUARE_SIZE + SQUARE_SIZE // 4, row * SQUARE_SIZE + SQUARE_SIZE // 4),
                     end_pos=(col * SQUARE_SIZE + 3 * SQUARE_SIZE // 4, row * SQUARE_SIZE + 3 * SQUARE_SIZE // 4),
-                    width=LINE_WIDTH
+                    width=CROSS_WIDTH
                 )
                 pygame.draw.line(
                     screen,
                     color,
                     start_pos=(col * SQUARE_SIZE + 3 * SQUARE_SIZE // 4, row * SQUARE_SIZE + SQUARE_SIZE // 4),
                     end_pos=(col * SQUARE_SIZE + SQUARE_SIZE // 4, row * SQUARE_SIZE + 3 * SQUARE_SIZE // 4),
-                    width=LINE_WIDTH
+                    width=CROSS_WIDTH
                 )
 
 def mark_square(row, col, player):
@@ -68,77 +64,71 @@ def mark_square(row, col, player):
 def available_square(row, col):
     return board[row][col] == 0
 
-def is_board_full(check_board = board):
+def is_board_full(check_board=board):
     for row in range(BOARD_ROWS):
         for col in range(BOARD_COLS):
             if check_board[row][col] == 0:
-                return True
-    return False
+                return False
+    return True
 
-def check_win(player, check_board = board):
+def check_win(player, check_board=board):
     for col in range(BOARD_COLS):
         if check_board[0][col] == player and check_board[1][col] == player and check_board[2][col] == player:
             return True
-        
     for row in range(BOARD_ROWS):
         if check_board[row][0] == player and check_board[row][1] == player and check_board[row][2] == player:
             return True
-        
     if check_board[0][0] == player and check_board[1][1] == player and check_board[2][2] == player:
         return True
-    
     if check_board[0][2] == player and check_board[1][1] == player and check_board[2][0] == player:
         return True
-    
     return False
 
 def minimax(minimax_board, depth, is_maximizing):
     if check_win(2, minimax_board):
-        return float('inf')
+        return 10 - depth
     elif check_win(1, minimax_board):
-        return float('inf')
+        return depth - 10
     elif is_board_full(minimax_board):
         return 0
-        
+
     if is_maximizing:
-        best_score = -1000
+        best_score = -float('inf')
         for row in range(BOARD_ROWS):
             for col in range(BOARD_COLS):
                 if minimax_board[row][col] == 0:
                     minimax_board[row][col] = 2
-                    score = minimax(minimax_board, depth + 1, is_maximizing=False)
+                    score = minimax(minimax_board, depth + 1, False)
                     minimax_board[row][col] = 0
                     best_score = max(score, best_score)
         return best_score
     else:
-        best_score = 1000
+        best_score = float('inf')
         for row in range(BOARD_ROWS):
             for col in range(BOARD_COLS):
                 if minimax_board[row][col] == 0:
                     minimax_board[row][col] = 1
-                    score = minimax(minimax_board, depth + 1, is_maximizing=True)
+                    score = minimax(minimax_board, depth + 1, True)
                     minimax_board[row][col] = 0
-                    best_score = max(score, best_score)
+                    best_score = min(score, best_score)
         return best_score
-    
+
 def best_move():
-    best_score = -1000
-    move = (-1,-1)
+    best_score = -float('inf')
+    move = None
     for row in range(BOARD_ROWS):
         for col in range(BOARD_COLS):
             if board[row][col] == 0:
                 board[row][col] = 2
-                score = minimax(board, depth=0, is_maximizing=False)
+                score = minimax(board, 0, False)
                 board[row][col] = 0
                 if score > best_score:
                     best_score = score
                     move = (row, col)
-
-    if move != (-1,-1):
-        mark_square(move[0], move[1], player=2)
+    if move:
+        mark_square(move[0], move[1], 2)
         return True
     return False
-
 
 def restart_game():
     screen.fill(BLACK)
@@ -146,7 +136,6 @@ def restart_game():
     for row in range(BOARD_ROWS):
         for col in range(BOARD_COLS):
             board[row][col] = 0
-
 
 draw_lines()
 
@@ -159,8 +148,8 @@ while True:
             sys.exit()
 
         if event.type == pygame.MOUSEBUTTONDOWN and not game_over:
-            mouseX =event.pos[0] //SQUARE_SIZE
-            mouseY =event.pos[1] // SQUARE_SIZE
+            mouseX = event.pos[0] // SQUARE_SIZE
+            mouseY = event.pos[1] // SQUARE_SIZE
 
             if available_square(mouseY, mouseX):
                 mark_square(mouseY, mouseX, player)
@@ -173,7 +162,7 @@ while True:
                         if check_win(2):
                             game_over = True
                         player = player % 2 + 1
-                  
+
                 if not game_over:
                     if is_board_full():
                         game_over = True
@@ -181,9 +170,9 @@ while True:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:
                 restart_game()
-                game = False
+                game_over = False
                 player = 1
-         
+
     if not game_over:
         draw_figures()
     else:
@@ -197,5 +186,4 @@ while True:
             draw_figures(GRAY)
             draw_lines(GRAY)
 
-    pygame.display.update() 
-
+    pygame.display.update()
